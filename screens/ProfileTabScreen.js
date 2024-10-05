@@ -52,8 +52,8 @@ const ProfileTabScreen = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get( 
-          `http://192.168.29.229:8000/profile/${userId}`
+        const response = await axios.get(
+          `http://10.12.43.27:8000/profile/${userId}`
         );
         const { user } = response.data;
         setUser(user);
@@ -76,7 +76,7 @@ const ProfileTabScreen = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          `http://192.168.29.229:8000/orders/${userId}`
+          `http://10.12.43.27:8000/orders/${userId}`
         );
         const orders = response.data.orders;
         setOrders(orders);

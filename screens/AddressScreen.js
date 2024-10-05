@@ -23,6 +23,7 @@ const AddressScreen = () => {
   const [landmark, setlandmark] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const { userId, setUserId } = useContext(UserType);
+  // getting the userId
   useEffect(() => {
     const fetchUser = async () => {
       const token = await AsyncStorage.getItem("authToken");
@@ -45,7 +46,7 @@ const AddressScreen = () => {
     //  the endpoint where you want to send the address data.
 
     axios
-      .post("http://192.168.29.229:8000/addresses", { userId, address })
+      .post("http://10.12.43.27:8000/addresses", { userId, address })
       .then((response) => {
         Alert.alert("Success", "Addresses added successfully");
         setName("");

@@ -29,25 +29,24 @@ const AddAddressScreen = () => {
     try {
       // get request to the endpoint that we just initialised
       const response = await axios.get(
-        `http://192.168.29.229:8000/addresses/${userId}`
+        `http://10.12.43.27:8000/addresses/${userId}`
       );
       const { addresses } = response.data;
       setAddresses(addresses);
     } catch (error) {
       console.log("error", error);
     }
-  };   
+  };
 
   // refresh the address when the component comes into the focus  when we navigate back
 
-  // without saving or refreshing the file we can see the address of new memeber added 
-  
-  useFocusEffect(
-    useCallback(()=>{
-      fetchAddresses();
-    },[])
-  )
+  // without saving or refreshing the file we can see the address of new memeber added
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchAddresses();
+    }, [])
+  );
 
   console.log("addresses", addresses);
 
@@ -115,7 +114,9 @@ const AddAddressScreen = () => {
               marginVertical: 10,
             }}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
+            >
               <Text style={{ fontSize: 15, fontWeight: "bold" }}>
                 {item?.name}
               </Text>
@@ -124,8 +125,12 @@ const AddAddressScreen = () => {
             <Text style={{ fontSize: 15, color: "#181818" }}>
               {item?.houseNo},{item?.landmark}
             </Text>
-            <Text style={{ fontSize: 15, color: "#181818" }}>{item?.street}</Text>
-            <Text style={{ fontSize: 15, color: "#181818" }}>India, Gurgaon</Text>
+            <Text style={{ fontSize: 15, color: "#181818" }}>
+              {item?.street}
+            </Text>
+            <Text style={{ fontSize: 15, color: "#181818" }}>
+              India, Gurgaon
+            </Text>
             <Text style={{ fontSize: 15, color: "#181818" }}>
               phoneNo: {item?.mobileNo}
             </Text>
@@ -152,7 +157,7 @@ const AddAddressScreen = () => {
               >
                 <Text>Edit</Text>
               </Pressable>
-  
+
               <Pressable
                 style={{
                   backgroundColor: "#F5F5F5",
@@ -165,7 +170,7 @@ const AddAddressScreen = () => {
               >
                 <Text>Remove</Text>
               </Pressable>
-  
+
               <Pressable
                 style={{
                   backgroundColor: "#F5F5F5",
@@ -184,7 +189,7 @@ const AddAddressScreen = () => {
       </View>
     </ScrollView>
   );
-}  
+};
 
 export default AddAddressScreen;
 

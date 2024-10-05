@@ -20,8 +20,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigation = useNavigation(); 
-  const[loading,setLoading]=useState(false)
+  const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -34,10 +34,10 @@ const LoginScreen = () => {
         }
       } catch (err) {
         console.log("error message", err);
-      };
+      }
       checkLoginStatus();
     };
-  }, []); 
+  }, []);
   // if(!loading){
   //   return <SplashScreen/>;
   // }
@@ -49,7 +49,7 @@ const LoginScreen = () => {
     };
 
     axios
-      .post("http://192.168.29.229:8000/login", user)
+      .post("http://10.12.43.27:8000/login", user)
       .then((response) => {
         console.log(response);
         const token = response.data.token;

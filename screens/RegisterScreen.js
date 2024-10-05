@@ -23,17 +23,14 @@ const RegisterScreen = () => {
   const navigation = useNavigation();
 
   const handleRegister = () => {
-
     const user = {
       name: name,
       email: email,
       password: password,
     };
 
-
-
     axios
-      .post("http://192.168.29.229:8000/register", user)
+      .post("http://10.12.43.27:8000/register", user)
       .then((response) => {
         console.log(response);
         Alert.alert(
@@ -46,10 +43,8 @@ const RegisterScreen = () => {
         setEmail("");
       })
       .catch((error) => {
-        Alert.alert("Registration error"); 
-        console.log("registration failed",error);
-      
-        
+        Alert.alert("Registration error");
+        console.log("registration failed", error);
       });
   };
 

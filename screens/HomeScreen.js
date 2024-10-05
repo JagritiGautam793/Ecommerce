@@ -9,9 +9,17 @@ import {
   TextInput,
   Image,
   ViewStyle,
+  Modal,
+  FlatList,
   Dimensions,
 } from "react-native";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
@@ -32,6 +40,7 @@ import { jwtDecode } from "jwt-decode";
 // import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
 
 const HomeScreen = () => {
+  // const [keyboardStatus, setKeyboardStatus] = useState(false);
   const navigation = useNavigation();
   const list = [
     {
@@ -207,15 +216,23 @@ const HomeScreen = () => {
   const [open, setOpen] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [category, setCategory] = useState("jewelery");
-  const { userId, setUserId } = useContext(UserType); 
-  const [selectedAddress,setSelectedAddress]=useState("");
-console.log(selectedAddress)
+  const { userId, setUserId } = useContext(UserType);
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [companyOpen, setCompanyOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const textInputRef = useRef(null);
+
+  console.log(selectedAddress);
   const [items, setItems] = useState([
     { label: "Men's clothing", value: "men's clothing" },
     { label: "jewelery", value: "jewelery" },
     { label: "electronics", value: "electronics" },
     { label: "women's clothing", value: "women's clothing" },
   ]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -228,14 +245,87 @@ console.log(selectedAddress)
     fetchData();
   }, []);
 
+  const [isSearching, setIsSearching] = useState(false);
+  const searchInputRef = useRef(null);
+
+  // useEffect(() => {
+  //   if (searchQuery) {
+  //     const filtered = products.filter((product) =>
+  //       product.title.toLowerCase().includes(searchQuery.toLowerCase())
+  //     );
+  //     setSearchResults(filtered);
+  //     setModalVisible(true);
+  //   } else {
+  //     setSearchResults([]);
+  //     setModalVisible(false);
+  //   }
+  // }, [searchQuery, products]);
+
+  // const handleSearch = (text) => {
+  //   setSearchQuery(text);
+  //   if (text) {
+  //     const filtered = products.filter((product) =>
+  //       product.title.toLowerCase().includes(text.toLowerCase())
+  //     );
+  //     setSearchResults(filtered);
+  //     setIsSearching(true);
+
+  //     // setFilteredProducts(filtered);
+  //     // setModalVisible(true);
+  //   } else {
+  //     setModalVisible(false);
+  //   }
+  // };
+
+  const navigateToProduct = (item) => {
+    navigation.navigate("Info", {
+      id: item.id,
+      title: item.title,
+      price: item?.price,
+      carouselImages: item.carouselImages,
+      color: item?.color,
+      size: item?.size,
+      oldPrice: item?.oldPrice,
+      item: item,
+    });
+    setModalVisible(false);
+    setSearchQuery("");
+  };
+
+  const renderSearchItem = ({ item }) => (
+    <Pressable
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+      }}
+      onPress={() => navigateToProduct(item)}
+    >
+      <Image
+        source={{ uri: item.image }}
+        style={{
+          width: 50,
+          height: 50,
+          resizeMode: "contain",
+          marginRight: 10,
+        }}
+      />
+      <View style={styles.productInfo}>
+        <Text style={{ fontSize: 16, fontWeight: "500" }}>{item.title}</Text>
+        <Text style={{ fontSize: 14, color: "#888" }}>${item.price}</Text>
+      </View>
+    </Pressable>
+  );
+
   const onGenderOpen = useCallback(() => {
     setCompanyOpen(false);
   }, []);
 
   // so basically 1st cart from store as reducer then empty array name cart
   const cart = useSelector((state) => state.cart.cart);
-  const [modalVisible, setModalVisible] = useState(false);
-
+  const [addressModalVisible, setAddressModalVisible] = useState(false);
   useEffect(() => {
     if (userId) {
       fetchAddresses();
@@ -246,7 +336,7 @@ console.log(selectedAddress)
     try {
       // get request to the endpoint that we just initialised
       const response = await axios.get(
-        `http://192.168.29.229:8000/addresses/${userId}`
+        `http://10.12.43.27:8000/addresses/${userId}`
       );
       const { addresses } = response.data;
       setAddresses(addresses);
@@ -254,6 +344,19 @@ console.log(selectedAddress)
       console.log("error", error);
     }
   };
+
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = products.filter((product) =>
+        product.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResults(filtered);
+      setModalVisible(true);
+    } else {
+      setSearchResults([]);
+      setModalVisible(false);
+    }
+  }, [searchQuery, products]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -295,6 +398,11 @@ console.log(selectedAddress)
                 height: 38,
                 flex: 1,
               }}
+              onPress={() => {
+                navigation.navigate("Search", { products: products });
+                // This will focus the TextInput when the Pressable is touched
+                textInputRef.current?.focus();
+              }}
             >
               <AntDesign
                 style={{ paddingLeft: 10 }}
@@ -302,13 +410,18 @@ console.log(selectedAddress)
                 size={22}
                 color="black"
               />
-              <TextInput placeholder="Search Amazon" />
+              <TextInput
+                ref={textInputRef}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search Amazon"
+              />
             </Pressable>
             <Feather name="mic" size={24} color="black" />
           </View>
 
           <Pressable
-            onPress={() => setModalVisible(!modalVisible)}
+            onPress={() => setAddressModalVisible(!addressModalVisible)}
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -318,16 +431,16 @@ console.log(selectedAddress)
             }}
           >
             <Ionicons name="location-outline" size={24} color="black" />
-            <Pressable > 
-              {selectedAddress?(
+            <Pressable>
+              {selectedAddress ? (
                 <Text>
-                  Deliver to {selectedAddress?.name}-{selectedAddress?.street} 
-                  
-                </Text> 
-              ):(
-                <Text style={{fontSize:13,fontWeight:"500"}}>Add a Address</Text>
+                  Deliver to {selectedAddress?.name}-{selectedAddress?.street}
+                </Text>
+              ) : (
+                <Text style={{ fontSize: 13, fontWeight: "500" }}>
+                  Add a Address
+                </Text>
               )}
-            
             </Pressable>
 
             <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
@@ -377,7 +490,7 @@ console.log(selectedAddress)
           />  */}
           <ScrollView
             horizontal
-            pagingEnabled  // Snaps to the next item like a carousel
+            pagingEnabled // Snaps to the next item like a carousel
             showsHorizontalScrollIndicator={false}
           >
             {images.map((image, index) => (
@@ -420,7 +533,7 @@ console.log(selectedAddress)
                 }}
               >
                 <Image
-                  style={{ width: 180, height: 180, resizeMode: "contain" }}
+                  style={{ width: 180, height: 120, resizeMode: "contain" }}
                   source={{ uri: item?.image }}
                 />
               </Pressable>
@@ -539,7 +652,6 @@ console.log(selectedAddress)
             }}
           >
             {/* Filters the products array to include only those items where the category property matches the category state variable. */}
-
             {products
               ?.filter((item) => item.category === category)
               .map((item, index) => (
@@ -548,8 +660,42 @@ console.log(selectedAddress)
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      {/* <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        onBackdropPress={() => setModalVisible(false)}
+        onHardwareBackPress={() => setModalVisible(!modalVisible)}
+        onTouchOutside={() => setModalVisible(!modalVisible)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setModalVisible(false)}
+        >
+          <View
+            style={{
+              marginTop: 100,
+              backgroundColor: "white",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              padding: 20,
+              flex: 1,
+            }}
+          >
+            <FlatList
+              data={searchResults}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderSearchItem}
+              // keyboardShouldPersistTaps="always"
+            />
+          </View>
+        </Pressable>
+      </Modal> */}
+
       <BottomModal
-        onBackdropPress={() => setModalVisible(!modalVisible)}
+        onBackdropPress={() => setAddressModalVisible(false)}
         swipeDirection={["up", "down"]}
         swipeThreshold={200}
         modalAnimation={
@@ -557,9 +703,9 @@ console.log(selectedAddress)
             slideFrom: "bottom",
           })
         }
-        onHardwareBackPress={() => setModalVisible(!modalVisible)}
-        visible={modalVisible}
-        onTouchOutside={() => setModalVisible(!modalVisible)}
+        onHardwareBackPress={() => setAddressModalVisible(!addressModalVisible)}
+        visible={addressModalVisible}
+        onTouchOutside={() => setAddressModalVisible(!addressModalVisible)}
       >
         <ModalContent style={{ width: "100%", height: 400 }}>
           <View style={{ marginBottom: 8 }}>
@@ -574,8 +720,8 @@ console.log(selectedAddress)
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {/* already added addresses */}
             {addresses?.map((item, index) => (
-              <Pressable 
-              onPress={()=>setSelectedAddress(item)}
+              <Pressable
+                onPress={() => setSelectedAddress(item)}
                 style={{
                   width: 140,
                   height: 140,
@@ -585,8 +731,9 @@ console.log(selectedAddress)
                   justifyContent: "center",
                   alignItems: "center",
                   gap: 3,
-                  marginRight: 15, 
-                  backgroundColor:selectedAddress===item? "#FBCEB1":"white"
+                  marginRight: 15,
+                  backgroundColor:
+                    selectedAddress === item ? "#FBCEB1" : "white",
                 }}
               >
                 <View
@@ -686,4 +833,10 @@ console.log(selectedAddress)
 
 export default HomeScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+});

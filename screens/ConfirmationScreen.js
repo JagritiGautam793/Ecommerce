@@ -42,7 +42,7 @@ const ConfirmationScreen = () => {
     try {
       // get request to the endpoint that we just initialised
       const response = await axios.get(
-        `http://192.168.29.229:8000/addresses/${userId}`
+        `http://10.12.43.27:8000/addresses/${userId}`
       );
       const { addresses } = response.data;
       setAddresses(addresses);
@@ -68,7 +68,7 @@ const ConfirmationScreen = () => {
       };
 
       const response = await axios.post(
-        "http://192.168.29.229:8000/orders",
+        "http://10.12.43.27:8000/orders",
         orderData
       );
       if (response.status === 200) {
@@ -81,29 +81,28 @@ const ConfirmationScreen = () => {
     } catch (error) {
       console.log("error", error.response?.data || error.message);
     }
-  }; 
+  };
 
-
-  const pay=async()=>{
-    try{ 
-      const options={
-        description:"Adding To Wallet",
-        currency:"INR",
-        name:"Amazon",
-        key:"rzp_test_skAyHE0KnBWhzW",
-        amount:total*100,
-        prefill:{
-          email:"void@razorpay.com",
-          contact:"9191919191",
-          name:"RazorPay Software"
+  const pay = async () => {
+    try {
+      const options = {
+        description: "Adding To Wallet",
+        currency: "INR",
+        name: "Amazon",
+        key: "rzp_test_skAyHE0KnBWhzW",
+        amount: total * 100,
+        prefill: {
+          email: "void@razorpay.com",
+          contact: "9191919191",
+          name: "RazorPay Software",
         },
-        theme:{
-          color:"#F37254"
-        }
+        theme: {
+          color: "#F37254",
+        },
       };
 
-      const data=await RazorpayCheckout.open(options);   
-      console.log(data)
+      const data = await RazorpayCheckout.open(options);
+      console.log(data);
 
       const orderData = {
         userId: userId,
@@ -112,12 +111,10 @@ const ConfirmationScreen = () => {
         shippingAddresses: selectedAddress,
         paymentMethod: "card",
       };
-
-
-    } catch(error){
-      console.log("error",error); 
+    } catch (error) {
+      console.log("error", error);
     }
-  }
+  };
 
   return (
     <ScrollView style={{ marginTop: 55 }}>
