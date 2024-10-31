@@ -117,7 +117,14 @@ const StackNavigator = () => {
         <Stack.Screen
           name="Order"
           component={OrderScreen}
-          options={{ headerShown: false }}
+          options={{
+            headerShown: false,
+            title: "Order Details",
+            headerStyle: {
+              backgroundColor: "#00CED1",
+            },
+            headerTintColor: "#fff",
+          }}
         />
         <Stack.Screen
           name="Search"

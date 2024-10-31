@@ -9,7 +9,16 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ffffff",
+      "plugins": [
+      [
+        "expo-speech-to-text",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
+          
+        }
+      ]
+    ]
     },
     "ios": {
       "supportsTablet": true

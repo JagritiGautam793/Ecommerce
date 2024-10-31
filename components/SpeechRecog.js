@@ -1,78 +1,78 @@
-// const SpeechRecognition = ({ onSpeechResult, renderButton }) => {
-//   const [isListening, setIsListening] = useState(false);
-//   const [isVoiceAvailable, setIsVoiceAvailable] = useState(false);
+// import React, { useEffect, useState } from "react";
+// import { View, Text, StyleSheet } from "react-native";
+// import Voice from "@react-native-voice/voice";
+
+// const VoiceToTextSearch = ({ isListening, onSpeechResult, onSpeechEnd }) => {
+//   const [error, setError] = useState("");
 
 //   useEffect(() => {
-//     const checkVoiceAvailability = async () => {
-//       try {
-//         const isAvailable = await Voice.isAvailable();
-//         setIsVoiceAvailable(isAvailable);
-
-//         if (isAvailable) {
-//           Voice.onSpeechStart = onSpeechStart;
-//           Voice.onSpeechEnd = onSpeechEnd;
-//           Voice.onSpeechResults = onSpeechResults;
-//         }
-//       } catch (e) {
-//         console.error(e);
-//       }
-//     };
-
-//     checkVoiceAvailability();
+//     Voice.onSpeechResults = handleSpeechResults;
+//     Voice.onSpeechError = handleSpeechError;
+//     Voice.onSpeechEnd = handleSpeechEnd;
 
 //     return () => {
-//       Voice.destroy().then(() => {
-//         Voice.removeAllListeners();
-//       });
+//       Voice.destroy().then(Voice.removeAllListeners);
 //     };
 //   }, []);
 
-//   const onSpeechStart = () => setIsListening(true);
-//   const onSpeechEnd = () => setIsListening(false);
-//   const onSpeechResults = (event) => {
-//     onSpeechResult(event.value[0]);
-//   };
+//   useEffect(() => {
+//     if (isListening) {
+//       startSpeechToText();
+//     } else {
+//       Voice.stop();
+//     }
+//   }, [isListening]);
 
-//   const toggleListening = async () => {
+//   const startSpeechToText = async () => {
+//     setError("");
 //     try {
-//       const hasPermission = await requestMicrophonePermission();
-//       if (!hasPermission) {
-//         console.log("Microphone permission denied");
-//         return;
-//       }
-
-//       if (isListening) {
-//         await Voice.stop();
-//       } else {
-//         const locale = Platform.OS === "android" ? "" : "en-US"; // Default locale
-//         await Voice.start(locale);
-//       }
-//     } catch (error) {
-//       console.error("Error toggling speech recognition:", error);
+//       await Voice.start("en-US");
+//     } catch (e) {
+//       setError("Error starting speech to text");
+//       console.error(e);
 //     }
 //   };
 
-//   // If voice is not available, display a fallback message
-//   if (!isVoiceAvailable) {
-//     return <Text>Speech recognition not available</Text>;
-//   }
+//   const handleSpeechResults = (e) => {
+//     if (e.value && e.value.length > 0) {
+//       onSpeechResult(e.value[0]);
+//     }
+//   };
 
-//   // If a custom renderButton is provided, render the button with mic status
-//   if (renderButton) {
-//     return renderButton({ isListening, onPress: toggleListening });
-//   }
+//   const handleSpeechError = (e) => {
+//     setError("Error in speech recognition");
+//     console.error(e);
+//     onSpeechEnd();
+//   };
 
-//   // Default mic button rendering
+//   const handleSpeechEnd = () => {
+//     onSpeechEnd();
+//   };
+
 //   return (
-//     <TouchableOpacity
-//       style={[styles.button, isListening && styles.buttonListening]}
-//       onPress={toggleListening}
-//     >
-//       <Feather
-//         name={isListening ? "mic-off" : "mic"}
-//         size={24}
-//         color={isListening ? "red" : "black"}
-//       />
-//     </TouchableOpacity>
+//     <View style={styles.container}>
+//       {isListening && <Text style={styles.listeningText}>Listening...</Text>}
+//       {error !== "" && <Text style={styles.errorText}>{error}</Text>}
+//     </View>
 //   );
 // };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     position: "absolute",
+//     bottom: 20,
+//     left: 0,
+//     right: 0,
+//     alignItems: "center",
+//   },
+//   listeningText: {
+//     fontSize: 18,
+//     color: "green",
+//   },
+//   errorText: {
+//     fontSize: 16,
+//     color: "red",
+//   },
+// });
+
+// export default VoiceToTextSearch;

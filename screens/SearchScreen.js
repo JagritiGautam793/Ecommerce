@@ -19,7 +19,6 @@ const useDebounce = (value, delay) => {
       setDebouncedValue(value);
     }, delay);
 
-    // Clean up the timeout if the value changes (before the delay finishes)
     return () => {
       clearTimeout(handler);
     };
@@ -33,10 +32,8 @@ const SearchScreen = ({ navigation, route }) => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const products = route.params?.products || [];
 
-  // Use the debounced search query with a delay of 500ms
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  // UseEffect to handle the search logic with the debounced value
   useEffect(() => {
     if (debouncedSearchQuery.length > 0) {
       const filtered = products.filter((product) =>
@@ -78,29 +75,38 @@ const SearchScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          {/* <AntDesign name="arrowleft" size={24} color="black" /> */}
-        </Pressable>
-        <View style={styles.searchBar}>
-          <AntDesign
-            style={styles.searchIcon}
-            name="search1"
-            size={22}
-            color="black"
-          />
-          <TextInput
-            style={styles.searchInput}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="Search Amazon"
-            autoFocus
-          />
+      {/* Updated Search Header */}
+      <View style={styles.headerContainer}>
+        <View style={styles.searchContainer}>
+          {/* <Pressable
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <AntDesign name="arrowleft" size={24} color="black" />
+          </Pressable> */}
+
+          <View style={styles.searchBar}>
+            <View style={styles.searchInputContainer}>
+              <AntDesign name="search1" size={22} color="#1f1f1f" />
+              <TextInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search products"
+                placeholderTextColor="gray"
+                style={styles.searchInput}
+                autoFocus
+              />
+            </View>
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery("")}>
+                <AntDesign name="close" size={20} color="#1f1f1f" />
+              </Pressable>
+            )}
+          </View>
         </View>
       </View>
+
+      {/* Search Results */}
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item.id.toString()}
@@ -120,46 +126,60 @@ const SearchScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 40,
-    backgroundColor: "white",
+    backgroundColor: "#F5F4F0",
+  },
+  headerContainer: {
+    backgroundColor: "#F5F4F0",
+    paddingTop: 44, // for iOS status bar
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
   searchContainer: {
-    backgroundColor: "#00CED1",
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 12,
   },
   backButton: {
-    marginRight: 10,
+    padding: 4,
   },
   searchBar: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
-    borderRadius: 3,
-    height: 38,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
   },
-  searchIcon: {
-    paddingLeft: 10,
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   searchInput: {
     flex: 1,
-    height: "100%",
-    paddingLeft: 10,
+    fontSize: 16,
+    color: "#1f1f1f",
+    paddingVertical: 0, // Remove default padding
   },
   searchItem: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    padding: 16,
+    backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
   searchItemImage: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     resizeMode: "contain",
-    marginRight: 10,
+    marginRight: 12,
+    backgroundColor: "white",
   },
   searchItemInfo: {
     flex: 1,
@@ -167,15 +187,19 @@ const styles = StyleSheet.create({
   searchItemTitle: {
     fontSize: 16,
     fontWeight: "500",
+    color: "#1f1f1f",
+    marginBottom: 4,
   },
   searchItemPrice: {
-    fontSize: 14,
-    color: "#888",
+    fontSize: 15,
+    color: "#666",
+    fontWeight: "500",
   },
   noResults: {
     fontSize: 16,
     textAlign: "center",
-    marginTop: 20,
+    marginTop: 24,
+    color: "#666",
   },
 });
 

@@ -36,12 +36,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserType } from "../UserContext";
 import { jwtDecode } from "jwt-decode";
 
+import { Audio } from "expo-av";
+import * as Speech from "expo-speech";
+
 // import { SliderBox } from "react-native-image-slider-box";
 // import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
 
 const HomeScreen = () => {
   // const [keyboardStatus, setKeyboardStatus] = useState(false);
   const navigation = useNavigation();
+  const [isListening, setIsListening] = useState(false);
+
   const list = [
     {
       id: "0",
@@ -79,8 +84,8 @@ const HomeScreen = () => {
     },
   ];
   const images = [
-    "https://img.etimg.com/thumb/msid-93051525,width-1070,height-580,imgsize-2243475,overlay-economictimes/photo.jpg",
-    "https://images-eu.ssl-images-amazon.com/images/G/31/img22/Wireless/devjyoti/PD23/Launches/Updated_ingress1242x550_3.gif",
+    "https://i.pinimg.com/564x/fc/f8/d2/fcf8d2fe78e2ad2f4d64d8df9d763922.jpg",
+    "https://i.pinimg.com/564x/63/53/b6/6353b6720b062ced8ce216adb6342054.jpg",
     "https://images-eu.ssl-images-amazon.com/images/G/31/img23/Books/BB/JULY/1242x550_Header-BB-Jul23.jpg",
   ];
   const deals = [
@@ -336,7 +341,7 @@ const HomeScreen = () => {
     try {
       // get request to the endpoint that we just initialised
       const response = await axios.get(
-        `http://10.12.43.27:8000/addresses/${userId}`
+        `http://192.168.29.229:8000/addresses/${userId}`
       );
       const { addresses } = response.data;
       setAddresses(addresses);
@@ -369,43 +374,104 @@ const HomeScreen = () => {
   }, []);
   console.log("addresses", addresses);
 
+  const [recording, setRecording] = useState();
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access microphone was denied");
+      }
+    })();
+  }, []);
+
+  const startListening = async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      );
+      setRecording(recording);
+      setIsListening(true);
+    } catch (err) {
+      console.error("Failed to start recording", err);
+    }
+  };
+
+  const stopListening = async () => {
+    setIsListening(false);
+    if (!recording) {
+      return;
+    }
+    try {
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      console.log("Recording stopped and stored at", uri);
+
+      // Here you would typically send this audio file to a speech-to-text service
+      // For demonstration, we'll use Expo's text-to-speech as a placeholder
+      // In a real app, replace this with a call to your preferred speech-to-text API
+      Speech.speak("Recording finished", { language: "en" });
+
+      setRecording(undefined);
+    } catch (err) {
+      console.error("Failed to stop recording", err);
+    }
+  };
+
+  const handleSearchInteraction = () => {
+    navigation.navigate("Search", { products: products });
+    setSearchQuery(""); // Reset search query when navigating
+  };
+
   return (
     <>
       <SafeAreaView
         style={{
           paddingTop: Platform.OS === "android" ? 40 : 0,
           flex: 1,
-          backgroundColor: "white",
+          backgroundColor: "#F5F4F0",
         }}
       >
         <ScrollView>
           <View
             style={{
-              backgroundColor: "#00CED1",
-              padding: 10,
+              backgroundColor: "#EEEEE6",
+              padding: 14,
               flexDirection: "row",
               alignItems: "center",
+              gap: 12,
             }}
           >
             <Pressable
               style={{
+                flex: 1,
                 flexDirection: "row",
                 alignItems: "center",
-                marginHorizontal: 7,
-                gap: 10,
-                backgroundColor: "white",
-                borderRadius: 3,
-                height: 38,
-                flex: 1,
+                backgroundColor: "#EEEEE6",
+                height: 46,
+                // flexDirection: "row",
+                // alignItems: "center",
+                // marginHorizontal: 7,
+                // gap: 10,
+                // // backgroundColor: "white",
+                // borderRadius: 8,
+                // height: 45,
+                // flex: 1,
+                // paddingHorizontal: 12,
               }}
-              onPress={() => {
-                navigation.navigate("Search", { products: products });
-                // This will focus the TextInput when the Pressable is touched
-                textInputRef.current?.focus();
-              }}
+              onPress={handleSearchInteraction}
+              // onPress={() => {
+              //   navigation.navigate("Search", { products: products });
+              //   // This will focus the TextInput when the Pressable is touched
+              //   textInputRef.current?.focus();
+              // }}
             >
               <AntDesign
-                style={{ paddingLeft: 10 }}
+                style={{ marginRight: 12 }}
                 name="search1"
                 size={22}
                 color="black"
@@ -415,9 +481,29 @@ const HomeScreen = () => {
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 placeholder="Search Amazon"
+                placeholderTextColor="#999"
+                style={{
+                  fontSize: 17,
+                  fontWeight: "bold",
+                  color: "#333",
+                  flex: 1,
+                  paddingVertical: 8,
+                  textAlign: "center",
+                }}
+                onFocus={handleSearchInteraction} // Add this to handle TextInput focus
+                editable={false} // Make TextInput non-editable since we're handling navigation
               />
             </Pressable>
-            <Feather name="mic" size={24} color="black" />
+            <Pressable
+              onPress={isListening ? stopListening : startListening}
+              style={{ padding: 8 }}
+            >
+              <Feather
+                name={isListening ? "mic-off" : "mic"}
+                size={24}
+                color={isListening ? "red" : "black"}
+              />
+            </Pressable>
           </View>
 
           <Pressable
@@ -427,7 +513,7 @@ const HomeScreen = () => {
               alignItems: "center",
               gap: 5,
               padding: 10,
-              backgroundColor: "#AFEEEE",
+              backgroundColor: "#A9BA9D",
             }}
           >
             <Ionicons name="location-outline" size={24} color="black" />
@@ -437,8 +523,8 @@ const HomeScreen = () => {
                   Deliver to {selectedAddress?.name}-{selectedAddress?.street}
                 </Text>
               ) : (
-                <Text style={{ fontSize: 13, fontWeight: "500" }}>
-                  Add a Address
+                <Text style={{ flex: 1, fontSize: 14 }}>
+                  Select a delivery location
                 </Text>
               )}
             </Pressable>
@@ -456,10 +542,28 @@ const HomeScreen = () => {
                   alignItems: "center",
                 }}
               >
-                <Image
-                  style={{ width: 50, height: 50, resizeMode: "contain" }}
-                  source={{ uri: item.image }}
-                />
+                <View
+                  style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    overflow: "hidden",
+                    backgroundColor: "#f0f0f0",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: 10,
+                  }}
+                >
+                  <Image
+                    style={{
+                      width: 50,
+                      height: 50,
+                      resizeMode: "contain",
+                      borderRadius: 25,
+                    }}
+                    source={{ uri: item.image }}
+                  />
+                </View>
                 <Text
                   style={{
                     textAlign: "center",
@@ -497,7 +601,7 @@ const HomeScreen = () => {
               <Image
                 key={index}
                 source={{ uri: image }}
-                style={{ width: Dimensions.get("window").width, height: 200 }}
+                style={{ width: Dimensions.get("window").width, height: 165 }}
               />
             ))}
           </ScrollView>
@@ -510,6 +614,7 @@ const HomeScreen = () => {
               flexDirection: "row",
               alignItems: "center",
               flexWrap: "wrap",
+              paddingHorizontal: 10,
             }}
           >
             {deals.map((item, index) => (
@@ -527,15 +632,40 @@ const HomeScreen = () => {
                   })
                 }
                 style={{
-                  marginVertical: 10,
-                  flexDirection: "row",
+                  // marginVertical: 10,
+                  // marginHorizontal: 5,
+                  // flexDirection: "row",
+                  // alignItems: "center",
+                  // width: "48%",
                   alignItems: "center",
+                  width: Dimensions.get("window").width / 2 - 20,
+                  marginHorizontal: 5,
+                  marginVertical: 5,
                 }}
               >
-                <Image
-                  style={{ width: 180, height: 120, resizeMode: "contain" }}
-                  source={{ uri: item?.image }}
-                />
+                <View
+                  style={{
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 3.84,
+                    elevation: 5,
+                    backgroundColor: "white",
+                    borderRadius: 12,
+                    padding: 5,
+                    width: "100%",
+                  }}
+                >
+                  <Image
+                    style={{
+                      width: "100%",
+                      height: 160,
+                      resizeMode: "contain",
+                      borderRadius: 10,
+                    }}
+                    source={{ uri: item?.image }}
+                  />
+                </View>
               </Pressable>
             ))}
           </View>
@@ -553,7 +683,13 @@ const HomeScreen = () => {
             Today's Deals
           </Text>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              padding: 10,
+            }}
+          >
             {offers.map((item, index) => (
               <Pressable
                 onPress={() =>
@@ -569,15 +705,38 @@ const HomeScreen = () => {
                   })
                 }
                 style={{
+                  marginRight: 10,
                   marginVertical: 10,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Image
-                  style={{ width: 150, height: 150, resizeMode: "contain " }}
-                  source={{ uri: item?.image }}
-                />
+                <View
+                  style={{
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 3.84,
+                    elevation: 5,
+                    backgroundColor: "white",
+                    borderRadius: 15,
+                    padding: 15,
+                    width: 180,
+                    height: 180,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Image
+                    style={{
+                      width: "90%",
+                      height: "100%",
+                      resizeMode: "contain",
+                      borderRadius: 10,
+                    }}
+                    source={{ uri: item?.image }}
+                  />
+                </View>
                 <View
                   style={{
                     backgroundColor: "#E31837",
@@ -585,7 +744,7 @@ const HomeScreen = () => {
                     width: 130,
                     justifyContent: "center",
                     alignItems: "center",
-                    marginTop: 10,
+                    marginTop: 12,
                     borderRadius: 4,
                   }}
                 >

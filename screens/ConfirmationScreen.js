@@ -42,7 +42,7 @@ const ConfirmationScreen = () => {
     try {
       // get request to the endpoint that we just initialised
       const response = await axios.get(
-        `http://10.12.43.27:8000/addresses/${userId}`
+        `http://192.168.29.229:8000/addresses/${userId}`
       );
       const { addresses } = response.data;
       setAddresses(addresses);
@@ -68,7 +68,7 @@ const ConfirmationScreen = () => {
       };
 
       const response = await axios.post(
-        "http://10.12.43.27:8000/orders",
+        "http://192.168.29.229:8000/orders",
         orderData
       );
       if (response.status === 200) {
@@ -190,7 +190,7 @@ const ConfirmationScreen = () => {
                 }}
               >
                 {selectedAddress && selectedAddress._id === item?._id ? (
-                  <FontAwesome5 name="dot-circle" size={24} color="#008397" />
+                  <FontAwesome5 name="dot-circle" size={24} color="#445544" />
                 ) : (
                   <Entypo
                     onPress={() => setSelectedAddress(item)}
@@ -279,7 +279,7 @@ const ConfirmationScreen = () => {
                       <Pressable
                         onPress={() => setCurrentStep(1)}
                         style={{
-                          backgroundColor: "#008397",
+                          backgroundColor: "#445544",
                           padding: 10,
                           borderRadius: 20,
                           justifyContent: "center",
@@ -319,7 +319,7 @@ const ConfirmationScreen = () => {
             }}
           >
             {option ? (
-              <FontAwesome5 name="dot-circle" size={24} color="#008397" />
+              <FontAwesome5 name="dot-circle" size={24} color="#445544" />
             ) : (
               <Entypo
                 onPress={() => setOption(!option)}
@@ -371,7 +371,7 @@ const ConfirmationScreen = () => {
             }}
           >
             {selectedOption === "cash" ? (
-              <FontAwesome5 name="dot-circle" size={24} color="#008397" />
+              <FontAwesome5 name="dot-circle" size={24} color="#445544" />
             ) : (
               <Entypo
                 onPress={() => setSelectedOption("cash")}
