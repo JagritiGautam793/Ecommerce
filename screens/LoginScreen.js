@@ -3,14 +3,14 @@ import {
   Text,
   View,
   SafeAreaView,
-  Image,
   KeyboardAvoidingView,
   TextInput,
   Pressable,
   Alert,
+  ImageBackground,
+  Platform,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-
 import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -26,21 +26,16 @@ const LoginScreen = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        // access to token
         const token = await AsyncStorage.getItem("authToken");
-
         if (token) {
           navigation.replace("Main");
         }
       } catch (err) {
         console.log("error message", err);
       }
-      checkLoginStatus();
     };
+    checkLoginStatus();
   }, []);
-  // if(!loading){
-  //   return <SplashScreen/>;
-  // }
 
   const handleLogin = () => {
     const user = {
@@ -61,150 +56,216 @@ const LoginScreen = () => {
         console.log(error);
       });
   };
+
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "white", alignItems: "center" }}
+    <ImageBackground
+      source={{
+        uri: "https://t3.ftcdn.net/jpg/04/55/53/78/360_F_455537818_2AwVoujHe2gH7IRYTgrZ932Nt4MdwTXD.jpg",
+      }}
+      style={styles.backgroundImage}
     >
-      <View>
-        <Image
-          style={{ width: 150, height: 100, marginTop: 30 }}
-          source={{
-            uri: "https://assets.stickpng.com/thumbs/6160562276000b00045a7d97.png",
-          }}
-        />
-      </View>
-
-      <KeyboardAvoidingView>
-        <View style={{ alignItems: "center" }}>
-          <Text
-            style={{
-              fontSize: 17,
-              fontWeight: "bold",
-              marginTop: 12,
-              color: "#041E42",
-            }}
+      <SafeAreaView style={styles.container}>
+        <View style={styles.overlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.formContainer}
           >
-            Login to Your Account
-          </Text>
+            <View style={styles.headerContainer}>
+              <Text style={styles.headerText}>Login to Your Account</Text>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <View style={styles.inputWrapper}>
+                <MaterialIcons
+                  style={styles.inputIcon}
+                  name="email"
+                  size={24}
+                  color="#ffffff"
+                />
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  style={styles.input}
+                  placeholder="Enter your Email"
+                  placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <View style={styles.inputWrapper}>
+                <AntDesign
+                  style={styles.inputIcon}
+                  name="lock1"
+                  size={24}
+                  color="#ffffff"
+                />
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={true}
+                  style={styles.input}
+                  placeholder="Enter your Password"
+                  placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                />
+              </View>
+            </View>
+
+            <View style={styles.optionsContainer}>
+              <Text style={styles.optionText}>Keep me logged in</Text>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </View>
+
+            <Pressable
+              onPress={handleLogin}
+              style={({ pressed }) => [
+                styles.loginButton,
+                pressed && styles.loginButtonPressed,
+              ]}
+            >
+              <Text style={styles.loginButtonText}>Login</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => navigation.navigate("Register")}
+              style={styles.registerContainer}
+            >
+              <Text style={styles.registerText}>
+                Don't have an account?{" "}
+                <Text style={styles.registerLink}>Sign Up</Text>
+              </Text>
+            </Pressable>
+          </KeyboardAvoidingView>
         </View>
-
-        <View style={{ marginTop: 70 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-              backgroundColor: "#D0D0D0",
-              paddingVertical: 5,
-              borderRadius: 5,
-              marginTop: 30,
-            }}
-          >
-            <MaterialIcons
-              style={{ marginLeft: 8 }}
-              name="email"
-              size={24}
-              color="gray"
-            />
-            <TextInput
-              value={email}
-              onChangeText={(text) => setEmail(text)}
-              style={{
-                color: "gray",
-                marginVertical: 10,
-                width: 280,
-                fontSize: email ? 16 : 16,
-              }}
-              placeholder="enter your Email"
-            />
-          </View>
-        </View>
-
-        <View style={{ marginTop: 10 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-              backgroundColor: "#D0D0D0",
-              paddingVertical: 5,
-              borderRadius: 5,
-              marginTop: 30,
-            }}
-          >
-            <AntDesign
-              style={{ marginLeft: 8 }}
-              name="lock1"
-              size={24}
-              color="gray"
-            />
-            <TextInput
-              value={password}
-              onChangeText={(text) => setPassword(text)}
-              secureTextEntry={true}
-              style={{
-                color: "gray",
-                marginVertical: 10,
-                width: 280,
-                fontSize: password ? 16 : 16,
-              }}
-              placeholder="enter your Password"
-            />
-          </View>
-        </View>
-
-        <View
-          style={{
-            marginTop: 12,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Text>Keep me logged in </Text>
-          <Text style={{ color: "#007FFF", fontWeight: "500" }}>
-            Forgot Password
-          </Text>
-        </View>
-
-        <View style={{ marginTop: 80 }} />
-
-        <Pressable
-          onPress={handleLogin}
-          style={{
-            width: 200,
-            backgroundColor: "#FEBE10",
-            borderRadius: 6,
-            marginLeft: "auto",
-            marginRight: "auto",
-            padding: 15,
-          }}
-        >
-          <Text
-            style={{
-              textAlign: "center",
-              color: "white",
-              fontSize: 16,
-              fontWeight: "bold",
-            }}
-          >
-            Login
-          </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => navigation.navigate("Register")}
-          style={{ marginTop: 15 }}
-        >
-          <Text style={{ textAlign: "center", color: "gray", fontSize: 16 }}>
-            Don't have an account? Sign Up
-          </Text>
-        </Pressable>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
-export default LoginScreen;
+const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Darker overlay for better contrast
+  },
+  overlay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  formContainer: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "rgba(20, 20, 20, 0.8)", // Darker, more opaque background
+    borderRadius: 20,
+    padding: 25,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  headerContainer: {
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  headerText: {
+    fontSize: 23,
+    fontWeight: "bold",
+    color: "#ffffff",
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+    letterSpacing: 0.5,
+  },
+  inputContainer: {
+    marginBottom: 15,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+  },
+  inputIcon: {
+    marginRight: 15,
+  },
+  input: {
+    flex: 1,
+    color: "#ffffff",
+    fontSize: 16,
+    paddingVertical: 10,
+  },
+  optionsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 30,
+    marginTop: 10,
+  },
+  optionText: {
+    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: 12,
+  },
+  forgotPasswordText: {
+    color: "#ffffff",
+    fontWeight: "500",
+    fontSize: 12,
+  },
+  loginButton: {
+    backgroundColor: "#FFC107", // Brighter yellow for better visibility
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 20,
+  },
+  loginButtonPressed: {
+    backgroundColor: "#FFB300", // Slightly darker when pressed
+    transform: [{ scale: 0.98 }],
+  },
+  loginButtonText: {
+    textAlign: "center",
+    color: "#000000", // Black text for better contrast on yellow button
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  registerContainer: {
+    padding: 10,
+  },
+  registerText: {
+    textAlign: "center",
+    color: "#ffffff",
+    fontSize: 14,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  registerLink: {
+    fontWeight: "bold",
+    textDecorationLine: "underline",
+    color: "#FFC107", // Matching yellow for consistency
+  },
+});
 
-const styles = StyleSheet.create({});
+export default LoginScreen;
