@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Image,
   Dimensions,
+  RefreshControl,
 } from "react-native";
 import React, { useLayoutEffect, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -30,13 +31,6 @@ const useProfile = (userId) => {
 
   const fetchProfile = useCallback(async () => {
     try {
-      const cachedUser = await AsyncStorage.getItem(CACHE_KEYS.USER_PROFILE);
-      if (cachedUser) {
-        setUser(JSON.parse(cachedUser));
-        setLoading(false);
-        return;
-      }
-
       const { data } = await axios.get(`${API_BASE_URL}/profile/${userId}`);
       setUser(data.user);
       await AsyncStorage.setItem(
@@ -56,36 +50,50 @@ const useProfile = (userId) => {
     }, [fetchProfile])
   );
 
-  return { user, loading };
+  return { user, loading, refetchProfile: fetchProfile };
 };
 
 const useOrders = (userId) => {
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  const fetchOrders = useCallback(async () => {
-    try {
-      const cachedOrders = await AsyncStorage.getItem(
-        CACHE_KEYS.ORDERS(userId)
-      );
-      if (cachedOrders) {
-        setOrders(JSON.parse(cachedOrders));
+  const fetchOrders = useCallback(
+    async (skipCache = false) => {
+      try {
+        setLoading(true);
+
+        if (!skipCache) {
+          const cachedOrders = await AsyncStorage.getItem(
+            CACHE_KEYS.ORDERS(userId)
+          );
+          if (cachedOrders) {
+            setOrders(JSON.parse(cachedOrders));
+            setLoading(false);
+            return;
+          }
+        }
+
+        const { data } = await axios.get(`${API_BASE_URL}/orders/${userId}`);
+        setOrders(data.orders);
+        await AsyncStorage.setItem(
+          CACHE_KEYS.ORDERS(userId),
+          JSON.stringify(data.orders)
+        );
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
         setLoading(false);
-        return;
+        setRefreshing(false);
       }
+    },
+    [userId]
+  );
 
-      const { data } = await axios.get(`${API_BASE_URL}/orders/${userId}`);
-      setOrders(data.orders);
-      await AsyncStorage.setItem(
-        CACHE_KEYS.ORDERS(userId),
-        JSON.stringify(data.orders)
-      );
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchOrders(true);
+  }, [fetchOrders]);
 
   useFocusEffect(
     useCallback(() => {
@@ -93,7 +101,7 @@ const useOrders = (userId) => {
     }, [fetchOrders])
   );
 
-  return { orders, loading };
+  return { orders, loading, refreshing, onRefresh, refetchOrders: fetchOrders };
 };
 
 const HeaderIcons = () => (
@@ -215,8 +223,14 @@ const OrdersSection = ({ orders, loading }) => (
 const ProfileTabScreen = () => {
   const { userId } = React.useContext(UserType);
   const navigation = useNavigation();
-  const { user, loading: userLoading } = useProfile(userId);
-  const { orders, loading: ordersLoading } = useOrders(userId);
+  const { user, loading: userLoading, refetchProfile } = useProfile(userId);
+  const {
+    orders,
+    loading: ordersLoading,
+    refreshing,
+    onRefresh,
+    refetchOrders,
+  } = useOrders(userId);
 
   const logout = async () => {
     await AsyncStorage.removeItem(CACHE_KEYS.AUTH_TOKEN);
@@ -226,19 +240,6 @@ const ProfileTabScreen = () => {
     ]);
     navigation.replace("Login");
   };
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: "",
-      headerStyle: {
-        backgroundColor: "#F5F4F0",
-        elevation: 0,
-        shadowOpacity: 0,
-      },
-      headerTintColor: "white",
-      headerRight: () => <HeaderIcons />,
-    });
-  }, [navigation]);
 
   const profileOptions = [
     {
@@ -260,6 +261,26 @@ const ProfileTabScreen = () => {
     },
   ];
 
+  useFocusEffect(
+    useCallback(() => {
+      refetchProfile();
+      refetchOrders(true); // Skip cache when screen is focused
+    }, [refetchProfile, refetchOrders])
+  );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: "",
+      headerStyle: {
+        backgroundColor: "#F5F4F0",
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+      headerTintColor: "white",
+      headerRight: () => <HeaderIcons />,
+    });
+  }, [navigation]);
+
   if (userLoading) {
     return (
       <View style={styles.loaderContainer}>
@@ -269,7 +290,17 @@ const ProfileTabScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#00CED1"]}
+        />
+      }
+    >
       <ProfileHeader user={user} />
 
       <View style={styles.optionsGrid}>
