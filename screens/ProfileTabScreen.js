@@ -9,7 +9,7 @@ import {
   Dimensions,
   RefreshControl,
 } from "react-native";
-import React, { useLayoutEffect, useCallback } from "react";
+import React, { useLayoutEffect, useCallback, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, AntDesign, MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -26,8 +26,8 @@ const CACHE_KEYS = {
 };
 
 const useProfile = (userId) => {
-  const [user, setUser] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async () => {
     try {
