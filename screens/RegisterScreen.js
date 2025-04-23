@@ -31,13 +31,16 @@ const RegisterScreen = () => {
     };
 
     axios
-      .post("http://192.168.29.229:8000/register", user)
+      .post("http://10.12.39.31:8000/register", user)
       .then((response) => {
         console.log(response);
         Alert.alert(
           "Registration Successful",
           "You have registered successfully"
         );
+        setName("");
+        setEmail("");
+        setPassword("");
         navigation.goBack();
       })
       .catch((error) => {

@@ -46,7 +46,7 @@ const AddressScreen = () => {
     //  the endpoint where you want to send the address data.
 
     axios
-      .post("http://192.168.29.229:8000/addresses", { userId, address })
+      .post("http://10.12.39.31:8000/addresses", { userId, address })
       .then((response) => {
         Alert.alert("Success", "Addresses added successfully");
         setName("");

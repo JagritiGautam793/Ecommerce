@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
-const API_BASE_URL = "http://192.168.29.229:8000";
+const API_BASE_URL = "http://10.12.39.31:8000";
 const CACHE_KEYS = {
   USER_PROFILE: "userProfile",
   AUTH_TOKEN: "authToken",

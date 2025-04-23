@@ -341,7 +341,7 @@ const HomeScreen = () => {
     try {
       // get request to the endpoint that we just initialised
       const response = await axios.get(
-        `http://192.168.29.229:8000/addresses/${userId}`
+        `http://10.12.39.31:8000/addresses/${userId}`
       );
       const { addresses } = response.data;
       setAddresses(addresses);
@@ -480,7 +480,7 @@ const HomeScreen = () => {
                 ref={textInputRef}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="Search Amazon"
+                placeholder="Search Product"
                 placeholderTextColor="#999"
                 style={{
                   fontSize: 17,

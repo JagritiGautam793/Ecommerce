@@ -1,3 +1,5 @@
+import "react-native-reanimated"; // 👈 MUST be first import
+
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import StackNavigator from "./navigation/StackNavigator";

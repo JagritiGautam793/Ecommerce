@@ -11,14 +11,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff",
       "plugins": [
-      [
-        "expo-speech-to-text",
-        {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
-          
-        }
+        [
+          "expo-speech-to-text",
+          {
+            "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
+          }
+        ]
       ]
-    ]
     },
     "ios": {
       "supportsTablet": true
@@ -32,6 +31,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "155b562d-99b4-427f-ac94-f81c91fca433"
+      }
     }
   }
 }
