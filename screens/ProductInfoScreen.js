@@ -21,6 +21,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/CartReducer";
 import debounce from "lodash/debounce";
+import FlyingBag from "../components/FlyingBag";
 
 const { width } = Dimensions.get("window");
 const height = (width * 100) / 100;
@@ -36,6 +37,8 @@ const ProductInfoScreen = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchAnimation] = useState(new Animated.Value(0));
 
+  const [showFlyingBag, setShowFlyingBag] = useState(false);
+
   const item = route.params?.item;
 
   const addItemToCart = useCallback(
@@ -43,6 +46,8 @@ const ProductInfoScreen = () => {
       setAddedToCart(true);
       dispatch(addToCart(item));
       setTimeout(() => setAddedToCart(false), 60000);
+
+      setShowFlyingBag(true);
     },
     [dispatch]
   );
@@ -232,6 +237,13 @@ const ProductInfoScreen = () => {
           <Pressable style={[styles.button, styles.buyNowButton]}>
             <Text style={styles.buttonText}>Buy Now</Text>
           </Pressable>
+
+          {showFlyingBag && (
+            <FlyingBag
+              triggerAnimation={true}
+              onFinish={() => setShowFlyingBag(false)}
+            />
+          )}
         </View>
       </View>
     </View>
