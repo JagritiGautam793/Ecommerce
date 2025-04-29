@@ -1,7 +1,5 @@
 # SnappyCart
 
-> 📱 A feature-rich mobile e-commerce app built with React Native & Expo - featuring real-time shopping, secure payments, and smooth animations
-
 A mobile e-commerce application built with React Native and Expo, featuring a complete shopping experience from browsing to checkout.
 
 ## Core Features
