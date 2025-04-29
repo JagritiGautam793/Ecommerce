@@ -1,6 +1,7 @@
 {
   "name": "ecommerce",
   "version": "1.0.0",
+  "description": "📱 A feature-rich mobile e-commerce app built with React Native & Expo - featuring real-time shopping, secure payments, and smooth animations",
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
