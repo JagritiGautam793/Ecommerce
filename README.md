@@ -1,4 +1,4 @@
-# E-commerce Mobile Application
+# SnappyCart
 
 A mobile e-commerce application built with React Native and Expo, featuring a complete shopping experience from browsing to checkout.
 
